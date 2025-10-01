@@ -25,6 +25,6 @@ def main():
 
 if __name__ == '__main__':
     print("   *****   BlueSky Open ATM simulator *****")
-    print("Distributed under GNU General Public License v3")
+    print("Distributed under MIT License")
     # Run mainloop if BlueSky_pygame is called directly
     main()

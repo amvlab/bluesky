@@ -42,7 +42,7 @@ def main():
             # Only print start message in the non-sim cases to avoid printing
             # this for every started node
             print("   *****   BlueSky Open ATM simulator *****")
-            print("Distributed under GNU General Public License v3")
+            print("Distributed under MIT License")
 
         # Start server if server/gui or server-headless is started here
         if bs.mode == 'server':
