@@ -154,6 +154,7 @@ class ScreenIO(Entity):
         data = dict()
         data['simt']       = bs.sim.simt
         data['id']         = bs.traf.id
+        data['actype']     = bs.traf.type
         data['lat']        = bs.traf.lat
         data['lon']        = bs.traf.lon
         data['alt']        = bs.traf.alt
