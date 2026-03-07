@@ -62,7 +62,12 @@ def defineArea(name, shape, coordinates, top=1e9, bottom=-1e9):
         basic_shapes[name] = shapes.Line(name, coordinates)
 
     # Pass the shape on to the connected clients
-    polypub.send_update(polys={name:dict(shape=shape, coordinates=coordinates)})
+    update = dict(shape=shape, coordinates=coordinates)
+    if top < 9e8:
+        update['top'] = top
+    if bottom > -9e8:
+        update['bottom'] = bottom
+    polypub.send_update(polys={name: update})
 
     return True  #, f'Created {shape} {name}'
 

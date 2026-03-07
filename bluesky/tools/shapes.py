@@ -74,6 +74,10 @@ class Shape:
     @property
     def raw(self):
         ret = dict(name=self.name, shape=self.kind(), coordinates=self.coordinates)
+        if self.top < 9e8:
+            ret['top'] = self.top
+        if self.bottom > -9e8:
+            ret['bottom'] = self.bottom
         if hasattr(self, 'color'):
             ret['color'] = self.color
         return ret
