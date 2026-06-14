@@ -1,0 +1,45 @@
+# Place this file at  <your-repo>/.github/workflows/daily-upstream-sync.yml
+# (workflows are only picked up from the repo-root .github/workflows/ directory).
+#
+# Companion files expected in the repo at:
+#   upstream-sync/sync_upstream.py
+#   upstream-sync/requirements.txt
+
+name: Daily upstream sync
+
+on:
+  schedule:
+    - cron: "0 6 * * *"     # 06:00 UTC daily — adjust as you like
+  workflow_dispatch: {}      # lets you run it on demand from the Actions tab
+
+permissions:
+  contents: read             # least privilege: this job only reads + POSTs out
+
+concurrency:
+  group: daily-upstream-sync
+  cancel-in-progress: false  # never interrupt an in-flight run
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r upstream-sync/requirements.txt
+
+      - name: Check upstream and fire routine
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          # auto-provided; lifts API rate limit
+          ROUTINE_TRIGGER_URL: ${{ secrets.ROUTINE_TRIGGER_URL }}
+          ROUTINE_TOKEN: ${{ secrets.ROUTINE_TOKEN }}        # you add this secret
+          UPSTREAM_REPO: TUDelft-CNS-ATM/bluesky
+          UPSTREAM_BRANCH: master
+          LOOKBACK_HOURS: "24"
+          MAX_COMMITS: "10"
+        run: python upstream-sync/sync_upstream.py
+        # To test without firing the routine, temporarily change to:
+        # run: python upstream-sync/sync_upstream.py --dry-run
