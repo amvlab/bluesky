@@ -171,6 +171,8 @@ class ScreenIO(Entity):
         data['nlos_tot'] = len(bs.traf.cd.lospairs_all)
         data['trk']        = bs.traf.trk
         data['vs']         = bs.traf.vs
+        data['bank']       = np.degrees(bs.traf.bank)
+        data['pitch']      = np.degrees(bs.traf.pitch)
         data['vmin']       = bs.traf.perf.vmin
         data['vmax']       = bs.traf.perf.vmax
 

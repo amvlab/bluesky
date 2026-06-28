@@ -103,6 +103,10 @@ class Traffic(Entity):
             self.M       = np.array([])  # mach number
             self.vs      = np.array([])  # vertical speed [m/s]
 
+            # Attitude
+            self.bank    = np.array([])  # bank angle [rad], signed (+right/-left)
+            self.pitch   = np.array([])  # pitch angle proxy (flight path angle) [rad]
+
             # Acceleration
             self.ax = np.array([])  # [m/s2] current longitudinal acceleration
 
@@ -441,18 +445,21 @@ class Traffic(Entity):
         # Turning bank triangle
         # tan phi = a centrigugal/a grav = omega^2 * R / g = omega * V /g
         # => omega = (g tan phi)/V
-        turnrate = np.degrees(g0 * np.tan(np.where(self.ap.turnphi>self.eps*self.eps,
-                                                   self.ap.turnphi,self.ap.bankdef)) \
-                                          / np.maximum(self.tas, self.eps))
+        bankmag = np.where(self.ap.turnphi > self.eps*self.eps,
+                           self.ap.turnphi, self.ap.bankdef)
+        turnrate = np.degrees(g0 * np.tan(bankmag) / np.maximum(self.tas, self.eps))
         delhdg = (self.aporasas.hdg - self.hdg + 180) % 360 - 180  # [deg]
 
-        # For exactly 180-degree turns, use aircraft turn preference only apply 
+        # For exactly 180-degree turns, use aircraft turn preference only apply
         # turn preference when turn180pref is -1 or 1, not when it's 0 (default)
         is_180_turn = np.round(np.abs(delhdg), 5) == 180
         use_turn_pref = np.logical_and(is_180_turn, self.ap.turn180pref)
         turn_direction = np.sign(self.ap.turn180pref) * 180
         delhdg = np.where(use_turn_pref, turn_direction, delhdg)
         self.swhdgsel = np.abs(delhdg) > np.abs(bs.sim.simdt * turnrate)
+
+        # Signed bank angle: nonzero only while actually turning
+        self.bank = np.where(self.swhdgsel, bankmag * np.sign(delhdg), 0.0)
 
         # Update heading
         self.hdg = np.where(self.swhdgsel, 
@@ -474,6 +481,9 @@ class Traffic(Entity):
         self.az = need_az * np.sign(delta_vs) * (300 * fpm)   # fixed vertical acc approx 1.6 m/s^2
         self.vs = np.where(need_az, self.vs+self.az*bs.sim.simdt, target_vs)
         self.vs = np.where(np.isfinite(self.vs), self.vs, 0)    # fix vs nan issue
+
+        # Pitch proxy = flight path angle from vs / tas (no AoA modeled)
+        self.pitch = np.arcsin(np.clip(self.vs / np.maximum(self.tas, self.eps), -1.0, 1.0))
 
     def update_groundspeed(self):
         # Compute ground speed and track from heading, airspeed and wind
