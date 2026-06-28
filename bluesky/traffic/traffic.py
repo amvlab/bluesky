@@ -484,6 +484,14 @@ class Traffic(Entity):
 
         # Pitch proxy = flight path angle from vs / tas (no AoA modeled)
         self.pitch = np.arcsin(np.clip(self.vs / np.maximum(self.tas, self.eps), -1.0, 1.0))
+        # Rotorcraft: pitch from forward airspeed only (nose-down to overcome drag).
+        # Zero in hover/pure vertical flight; saturates to a max at cruise speed.
+        lifttype = getattr(self.perf, 'lifttype', None)
+        if lifttype is not None:
+            rotor_pitch_max = np.deg2rad(15.0)
+            rotor_tas_ref   = 20.0  # [m/s] forward speed at which pitch ~= 0.76 * max
+            rotor_pitch = -np.tanh(self.tas / rotor_tas_ref) * rotor_pitch_max
+            self.pitch = np.where(lifttype == 2, rotor_pitch, self.pitch)
 
     def update_groundspeed(self):
         # Compute ground speed and track from heading, airspeed and wind
