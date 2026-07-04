@@ -53,9 +53,9 @@ class Config:
     max_commits: int = int(os.environ.get("MAX_COMMITS", "10"))
     lookback_hours: int = int(os.environ.get("LOOKBACK_HOURS", "24"))
 
-    routine_url: str = field(default_factory=lambda: os.environ.get("ROUTINE_TRIGGER_URL", ""))
-    routine_token: str = field(default_factory=lambda: os.environ.get("ROUTINE_TOKEN", ""))
-    routine_beta: str = field(default_factory=lambda: os.environ.get("ROUTINE_BETA", DEFAULT_BETA))
+    routine_url: str = field(default_factory=lambda: os.environ.get("ROUTINE_TRIGGER_URL", "").strip())
+    routine_token: str = field(default_factory=lambda: os.environ.get("ROUTINE_TOKEN", "").strip())
+    routine_beta: str = field(default_factory=lambda: os.environ.get("ROUTINE_BETA", DEFAULT_BETA).strip())
 
 
 # --------------------------------------------------------------------------- #
