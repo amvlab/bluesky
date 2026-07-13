@@ -61,12 +61,19 @@ def defineArea(name, shape, coordinates, top=1e9, bottom=-1e9):
     elif shape == 'LINE':
         basic_shapes[name] = shapes.Line(name, coordinates)
 
-    # Pass the shape on to the connected clients
+    # Pass the shape on to the connected clients. Read top/bottom back from the
+    # created shape so the live update carries the same canonical values (in
+    # meters, the units aircraft altitudes are sent to clients in) as the
+    # snapshot a reconnecting client receives via Shape.raw. Reading them from
+    # the shape also keeps top/bottom consistent when they are supplied in the
+    # wrong order, since Shape.__init__ sorts them.
     update = dict(shape=shape, coordinates=coordinates)
-    if top < 9e8:
-        update['top'] = top
-    if bottom > -9e8:
-        update['bottom'] = bottom
+    poly = basic_shapes.get(name)
+    if poly is not None:
+        if poly.top < 9e8:
+            update['top'] = poly.top
+        if poly.bottom > -9e8:
+            update['bottom'] = poly.bottom
     polypub.send_update(polys={name: update})
 
     return True  #, f'Created {shape} {name}'
