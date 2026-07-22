@@ -45,17 +45,27 @@ GITHUB_API = "https://api.github.com"
 DEFAULT_BETA = "experimental-cc-routine-2026-04-01"
 
 
+def _clean_env(name: str, default: str = "") -> str:
+    """Env var with ALL whitespace removed (tokens/URLs never contain any).
+
+    Secrets pasted into GitHub Actions sometimes pick up an embedded newline
+    from a line wrap; that is illegal in an HTTP header and .strip() alone
+    does not remove it.
+    """
+    return "".join(os.environ.get(name, default).split())
+
+
 @dataclass
 class Config:
-    github_token: str = field(default_factory=lambda: os.environ.get("GITHUB_TOKEN", ""))
+    github_token: str = field(default_factory=lambda: _clean_env("GITHUB_TOKEN"))
     upstream_repo: str = os.environ.get("UPSTREAM_REPO", "TUDelft-CNS-ATM/bluesky")
     upstream_branch: str = os.environ.get("UPSTREAM_BRANCH", "master")
     max_commits: int = int(os.environ.get("MAX_COMMITS", "10"))
     lookback_hours: int = int(os.environ.get("LOOKBACK_HOURS", "24"))
 
-    routine_url: str = field(default_factory=lambda: os.environ.get("ROUTINE_TRIGGER_URL", "").strip())
-    routine_token: str = field(default_factory=lambda: os.environ.get("ROUTINE_TOKEN", "").strip())
-    routine_beta: str = field(default_factory=lambda: os.environ.get("ROUTINE_BETA", DEFAULT_BETA).strip())
+    routine_url: str = field(default_factory=lambda: _clean_env("ROUTINE_TRIGGER_URL"))
+    routine_token: str = field(default_factory=lambda: _clean_env("ROUTINE_TOKEN"))
+    routine_beta: str = field(default_factory=lambda: _clean_env("ROUTINE_BETA", DEFAULT_BETA))
 
 
 # --------------------------------------------------------------------------- #
