@@ -27,7 +27,7 @@ class Node(Base):
     def addnodes(self, count=1):
         pass
 
-    def delnode(self, node_id):
+    def delnode(self, node_id=None):
         pass
 
     def send(self, topic, data='', to_group=b''):

@@ -13,9 +13,9 @@
     <div class="row">
             <div class="span12">
             <h1 id="delnode-delete-node">DELNODE: Delete node</h1>
-<p>Terminate a single running simulation node, identified by its (hexadecimal) node id. Other nodes and the server itself keep running. Deleting the last node is allowed: the server stays up with zero nodes, and new nodes can be spawned with ADDNODES. An unknown node id is ignored.</p>
+<p>Terminate a single running simulation node, identified by its (hexadecimal) node id. When no id is given, the currently active node is deleted. Other nodes and the server itself keep running. Deleting the last remaining node is refused: use QUIT to stop the server, which also stops its last node. An unknown node id is ignored.</p>
 <p><strong>Usage:</strong></p>
-<pre><code>DELNODE nodeid</code></pre>
+<pre><code>DELNODE [nodeid]</code></pre>
 <p><strong>Arguments:</strong></p>
 <table>
 <thead>
@@ -30,8 +30,8 @@
 <tr class="odd">
 <td>nodeid</td>
 <td>txt</td>
-<td>yes</td>
-<td>The hexadecimal id of the node to be deleted.</td>
+<td>no</td>
+<td>The hexadecimal id of the node to be deleted (default: the active node).</td>
 </tr>
 </tbody>
 </table>

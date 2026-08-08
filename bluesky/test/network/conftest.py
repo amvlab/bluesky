@@ -16,6 +16,9 @@ class FakeSocket:
     def send_multipart(self, msg):
         self.sent.append(msg)
 
+    def setsockopt(self, opt, value):
+        pass
+
 
 class FakeProcess:
     """ Stand-in for a subprocess.Popen node process. """
@@ -51,3 +54,32 @@ def server(monkeypatch):
     # signalling path, so no real signal is ever sent to a real pid.
     monkeypatch.setattr(srvmod.platform, 'system', lambda: 'Linux')
     yield srv
+
+
+@pytest.fixture
+def client():
+    """ A Client with its network sockets replaced by recording stubs.
+
+        Client is an Entity singleton, so every test gets the same
+        instance: reset its state and signal connections here.
+    """
+    from bluesky.network.client import Client
+    cl = Client()
+    if not isinstance(cl.sock_recv, FakeSocket):
+        cl.sock_recv.close()
+        cl.sock_send.close()
+    cl.sock_recv = FakeSocket()
+    cl.sock_send = FakeSocket()
+    cl.nodes.clear()
+    cl.servers.clear()
+    cl.acttopics.clear()
+    cl.act_id = None
+    # Restore the signal connections of a freshly-started client
+    for sig, slot in ((cl.node_added, cl.actnode),
+                      (cl.node_removed, cl._actnode_removed)):
+        try:
+            sig.disconnect(slot)
+        except Exception:
+            pass
+        sig.connect(slot)
+    yield cl

@@ -229,14 +229,19 @@ class Node(Entity):
         '''
         self.send('ADDNODES', dict(count=count, node_ids=node_ids), self.server_id)
 
-    def delnode(self, node_id):
+    def delnode(self, node_id=None):
         ''' Tell the server that owns the specified node to terminate it.
 
             Arguments:
             - node_id: The id of the node to delete. Either a bytestring,
-              or its hexadecimal string representation.
+              or its hexadecimal string representation. When no id is
+              passed this node itself is the target: a bare DELNODE
+              command from a client is forwarded to the active node, so
+              by default the active node is the node that is deleted.
         '''
-        if isinstance(node_id, str):
+        if node_id is None:
+            node_id = self.node_id
+        elif isinstance(node_id, str):
             node_id = hex2bin(node_id)
         # The owning server shares the group id of the node, at sequence index 0
         self.send('DELNODE', node_id, node_id[:-1] + seqidx2id(0))

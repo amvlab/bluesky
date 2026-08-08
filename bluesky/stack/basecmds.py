@@ -185,10 +185,10 @@ def initbasecmds():
             "Delete command (aircraft, wind, area)",
         ],
         "DELNODE": [
-            "DELNODE nodeid",
-            "txt",
+            "DELNODE [nodeid]",
+            "[txt]",
             bs.net.delnode,
-            "Remove a simulation instance/node by its (hexadecimal) id",
+            "Remove a simulation instance/node by its (hexadecimal) id (default: the active node)",
         ],
 
         "DIST": [
