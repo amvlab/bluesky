@@ -16,6 +16,7 @@ CRE	Create an aircraft	CRE acid,type,lat,lon,hdg,alt,spd	txt,txt,latlon,hdg,alt,
 DATAFEED	Select an ADS-B data source for traffic	DATAFEED [ON/OFF]	[onoff]	 Modesbeast.toggle of bluesky.tools.datafeed.Modesbeast object
 DEFWPT	Define a waypoint only for this scenario/run	DEFWPT wpname,[lat,lon,type,refapt,countrycode]	txt,[latlon,txt,txt,txt]	
 DEL	Delete command (aircraft, wind, area)	DEL acid/WIND/shape	txt	
+DELNODE	Remove a simulation instance/node by its (hexadecimal) id	DELNODE nodeid	txt	
 DELRTE	Delete for this a/c the complete route/dest/orig (FMS)	DELRTE acid	acid	
 DELWPT	Delete a waypoint from a route (FMS)	DELWPT acid,wpname	acid,wpinroute	
 DEST	Set destination of aircraft, aircraft wil fly to this airport	DEST acid, latlon/airport	acid,wpt/latlon	

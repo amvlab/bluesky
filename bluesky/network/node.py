@@ -8,7 +8,7 @@ from bluesky.core import Entity, Signal
 from bluesky.network import context as ctx
 from bluesky.network.subscriber import Subscription
 from bluesky.network.npcodec import encode_ndarray, decode_ndarray
-from bluesky.network.common import genid, asbytestr, seqidx2id, seqid2idx, MSG_SUBSCRIBE, MSG_UNSUBSCRIBE, GROUPID_NOGROUP, GROUPID_CLIENT, GROUPID_SIM, GROUPID_DEFAULT, IDLEN
+from bluesky.network.common import genid, asbytestr, hex2bin, seqidx2id, seqid2idx, MSG_SUBSCRIBE, MSG_UNSUBSCRIBE, GROUPID_NOGROUP, GROUPID_CLIENT, GROUPID_SIM, GROUPID_DEFAULT, IDLEN
 
 
 # Register settings defaults
@@ -223,8 +223,20 @@ class Node(Entity):
         self.sock_recv.setsockopt(zmq.UNSUBSCRIBE, bto_group.ljust(IDLEN, b'*') + btopic + bfrom_group)
 
     def addnodes(self, count=1, *node_ids):
-        ''' Tell the server to add 'count' nodes. 
-        
+        ''' Tell the server to add 'count' nodes.
+
             If provided, create these nodes with the specified node ids.
         '''
         self.send('ADDNODES', dict(count=count, node_ids=node_ids), self.server_id)
+
+    def delnode(self, node_id):
+        ''' Tell the server that owns the specified node to terminate it.
+
+            Arguments:
+            - node_id: The id of the node to delete. Either a bytestring,
+              or its hexadecimal string representation.
+        '''
+        if isinstance(node_id, str):
+            node_id = hex2bin(node_id)
+        # The owning server shares the group id of the node, at sequence index 0
+        self.send('DELNODE', node_id, node_id[:-1] + seqidx2id(0))

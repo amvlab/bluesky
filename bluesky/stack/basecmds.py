@@ -184,6 +184,12 @@ def initbasecmds():
             else bs.traf.delete(a),
             "Delete command (aircraft, wind, area)",
         ],
+        "DELNODE": [
+            "DELNODE nodeid",
+            "txt",
+            bs.net.delnode,
+            "Remove a simulation instance/node by its (hexadecimal) id",
+        ],
 
         "DIST": [
             "DIST lat0, lon0, lat1, lon1",
