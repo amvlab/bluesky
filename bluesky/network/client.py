@@ -15,6 +15,7 @@ class Client(Node):
         # Signals
         self.actnode_changed = Signal('actnode-changed')
         self.node_added.connect(self.actnode)
+        self.node_removed.connect(self._actnode_removed)
 
     def update(self):
         ''' Client periodic update function.
@@ -49,6 +50,25 @@ class Client(Node):
 
         return self.act_id
 
+    def _actnode_removed(self, node_id):
+        ''' When the active node is removed, fail over to one of the
+            remaining nodes. When no nodes remain, the next node that
+            appears becomes the active node.
+        '''
+        if node_id != self.act_id:
+            return
+        newact = next(iter(self.nodes), None)
+        if newact is not None:
+            self.actnode(newact)
+        else:
+            # No nodes left: unsubscribe act topics from the removed node,
+            # and make the next node that appears the active node
+            for topic, groupset in self.acttopics.items():
+                for to_group in groupset:
+                    self._unsubscribe(topic, self.act_id, to_group)
+            self.act_id = None
+            self.node_added.connect(self.actnode)
+
     def _subscribe(self, topic, from_group=GROUPID_DEFAULT, to_group='', actonly=False):
         if from_group == GROUPID_DEFAULT:
             from_group = GROUPID_SIM
@@ -80,3 +100,17 @@ class Client(Node):
             currently-active node is targeted.
         '''
         self.send('ADDNODES', dict(count=count, node_ids=node_ids), server_id or genid(self.act_id[:-1], seqidx=0))
+
+    def delnode(self, node_id=None):
+        ''' Tell the server that owns the specified node to terminate it.
+
+            Arguments:
+            - node_id: The id of the node to delete. Either a bytestring,
+              or its hexadecimal string representation. When no id is
+              passed the currently active node is deleted.
+        '''
+        node_id = node_id or self.act_id
+        if node_id is None:
+            print('DELNODE: no node id given, and no active node to delete')
+            return
+        super().delnode(node_id)
